@@ -3,7 +3,7 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 #include <image_transport/image_transport.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -12,7 +12,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include "rclcpp/wait_for_message.hpp"
+#include <rclcpp/wait_for_message.hpp>
 
 using namespace std::chrono_literals;
 
@@ -139,7 +139,10 @@ private:
             std::vector<int> marker_ids;
             std::vector<std::vector<cv::Point2f>> marker_corners, rejected_candidates;
             cv::Mat dist_coeffs = cv::Mat::zeros(4, 1, CV_64F);
-            cv::aruco::detectMarkers(image, aruco_dict_, marker_corners, marker_ids, aruco_parameters_, rejected_candidates, camera_matrix_, camera_distortion_);
+
+            cv::Mat undistortedImage;
+            cv::undistort(image, undistortedImage, camera_matrix_, camera_distortion_);
+            cv::aruco::detectMarkers(undistortedImage, aruco_dict_, marker_corners, marker_ids, aruco_parameters_, rejected_candidates);
 
             if (!marker_ids.empty())
             {
@@ -218,7 +221,7 @@ private:
                     marker_array.markers.push_back(marker);
 
                     // Draw 3D axis on the marker in the image
-                    cv::aruco::drawAxis(image, camera_matrix_, camera_distortion_, rvec, tvec, marker_size_ * 0.7f);
+                    cv::drawFrameAxes(image, camera_matrix_, camera_distortion_, rvec, tvec, marker_size_ * 0.7f);
                     draw3dAxis(image, tvec, rvec, 1);
                 }
 
