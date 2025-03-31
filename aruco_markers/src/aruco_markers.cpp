@@ -16,10 +16,10 @@
 
 using namespace std::chrono_literals;
 
-class ArucoRos2Node : public rclcpp::Node
+class ArucoMarkersNode : public rclcpp::Node
 {
 public:
-    ArucoRos2Node() : Node("aruco_markers"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
+    ArucoMarkersNode() : Node("aruco_markers"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
     {
         this->declare_parameter("marker_size", 0.1);
         this->declare_parameter("camera_frame", "camera_rgb_optical_frame");
@@ -47,7 +47,7 @@ public:
         // Image transport subscriber
         it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
         image_subscriber_ = it_->subscribe(image_topic_, 1,
-                                           std::bind(&ArucoRos2Node::image_callback, this, std::placeholders::_1));
+                                           std::bind(&ArucoMarkersNode::image_callback, this, std::placeholders::_1));
 
         // Publisher for marker information
         marker_info_publisher_ = this->create_publisher<std_msgs::msg::String>("aruco_marker_info", 10);
@@ -380,7 +380,7 @@ private:
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    auto aruco_node = std::make_shared<ArucoRos2Node>();
+    auto aruco_node = std::make_shared<ArucoMarkersNode>();
     aruco_node->initialize();
     rclcpp::spin(aruco_node);
     rclcpp::shutdown();
