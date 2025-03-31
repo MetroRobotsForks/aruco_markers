@@ -1,4 +1,4 @@
-# aruco_ros2
+# aruco_markers
 
 A ros2 package for [detecting ArUco markers](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html). 
 This package provides a ros2 node that listens to a camera image topic, detects all markers using OpenCV, and publishes them as an array, including their poses relative to the camera frame.
@@ -22,7 +22,7 @@ colcon build
 
 ```
 source install/setup.bash
-ros2 run aruco_ros2 aruco_ros2 --ros-args \
+ros2 run aruco_markers aruco_markers --ros-args \
   -p marker_size:=0.1 \
   -p camera_frame:=camera_rgb_optical_frame \
   -p image_topic:=/camera/color/image_raw \

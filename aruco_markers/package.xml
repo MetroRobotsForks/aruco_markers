@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>aruco_ros2</name>
+  <name>aruco_markers</name>
   <version>0.0.0</version>
   <description>A ros2 node for detecting aruco markers in camera images</description>
   <maintainer email="davewbrwn@gmail.com">David Brown</maintainer>
   <license>MIT</license>
-  <url type="website">https://github.com/namo-robotics/aruco_ros2</url>
+  <url type="website">https://github.com/namo-robotics/aruco_markers</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -19,7 +19,7 @@
   <build_depend>tf2_ros</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>aruco_ros2_msgs</build_depend>
+  <build_depend>aruco_markers_msgs</build_depend>
 
   <exec_depend>opencv</exec_depend>
   <exec_depend>image_transport</exec_depend>
@@ -27,7 +27,7 @@
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>aruco_ros2_msgs</exec_depend>
+  <exec_depend>aruco_markers_msgs</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

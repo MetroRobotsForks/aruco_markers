@@ -3,28 +3,28 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 #include <image_transport/image_transport.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <aruco_ros2_msgs/msg/marker.hpp>
-#include <aruco_ros2_msgs/msg/marker_array.hpp>
+#include <aruco_markers_msgs/msg/marker.hpp>
+#include <aruco_markers_msgs/msg/marker_array.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include "rclcpp/wait_for_message.hpp"
+#include <rclcpp/wait_for_message.hpp>
 
 using namespace std::chrono_literals;
 
-class ArucoRos2Node : public rclcpp::Node
+class ArucoMarkersNode : public rclcpp::Node
 {
 public:
-    ArucoRos2Node() : Node("aruco_ros2"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
+    ArucoMarkersNode() : Node("aruco_markers"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
     {
         this->declare_parameter("marker_size", 0.1);
         this->declare_parameter("camera_frame", "camera_rgb_optical_frame");
-        this->declare_parameter("image_topic", "/camera/color/image_raw");
-        this->declare_parameter("camera_info_topic", "/camera/color/camera_info");
+        this->declare_parameter("image_topic", "camera/color/image_raw");
+        this->declare_parameter("camera_info_topic", "camera/color/camera_info");
         this->declare_parameter("dictionary", "DICT_ARUCO_ORIGINAL");
 
         marker_size_ = this->get_parameter("marker_size").as_double();
@@ -47,14 +47,14 @@ public:
         // Image transport subscriber
         it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
         image_subscriber_ = it_->subscribe(image_topic_, 1,
-                                           std::bind(&ArucoRos2Node::image_callback, this, std::placeholders::_1));
+                                           std::bind(&ArucoMarkersNode::image_callback, this, std::placeholders::_1));
 
         // Publisher for marker information
         marker_info_publisher_ = this->create_publisher<std_msgs::msg::String>("aruco_marker_info", 10);
-        marker_array_pub_ = this->create_publisher<aruco_ros2_msgs::msg::MarkerArray>("/aruco/markers", 10);
+        marker_array_pub_ = this->create_publisher<aruco_markers_msgs::msg::MarkerArray>("aruco/markers", 10);
 
         // Image publisher
-        image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("/aruco/result", 10);
+        image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("aruco/result", 10);
 
         // TF broadcaster for publishing transforms
         tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
@@ -125,7 +125,7 @@ private:
             return;
         }
 
-        aruco_ros2_msgs::msg::MarkerArray marker_array;
+        aruco_markers_msgs::msg::MarkerArray marker_array;
         marker_array.header.stamp = this->get_clock()->now();
         marker_array.header.frame_id = camera_frame_;
 
@@ -139,7 +139,10 @@ private:
             std::vector<int> marker_ids;
             std::vector<std::vector<cv::Point2f>> marker_corners, rejected_candidates;
             cv::Mat dist_coeffs = cv::Mat::zeros(4, 1, CV_64F);
-            cv::aruco::detectMarkers(image, aruco_dict_, marker_corners, marker_ids, aruco_parameters_, rejected_candidates, camera_matrix_, camera_distortion_);
+
+            cv::Mat undistortedImage;
+            cv::undistort(image, undistortedImage, camera_matrix_, camera_distortion_);
+            cv::aruco::detectMarkers(undistortedImage, aruco_dict_, marker_corners, marker_ids, aruco_parameters_, rejected_candidates);
 
             if (!marker_ids.empty())
             {
@@ -206,7 +209,7 @@ private:
                     marker_pose.pose.orientation.w = marker_transform.transform.rotation.w;
 
                     // Populate Marker message
-                    aruco_ros2_msgs::msg::Marker marker;
+                    aruco_markers_msgs::msg::Marker marker;
                     marker.header.frame_id = camera_frame_;
                     marker.header.stamp = msg->header.stamp;
                     marker.id = marker_ids[i];
@@ -218,7 +221,7 @@ private:
                     marker_array.markers.push_back(marker);
 
                     // Draw 3D axis on the marker in the image
-                    cv::aruco::drawAxis(image, camera_matrix_, camera_distortion_, rvec, tvec, marker_size_ * 0.7f);
+                    cv::drawFrameAxes(image, camera_matrix_, camera_distortion_, rvec, tvec, marker_size_ * 0.7f);
                     draw3dAxis(image, tvec, rvec, 1);
                 }
 
@@ -345,7 +348,7 @@ private:
 
     // ROS 2 Publisher for ArUco marker info
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr marker_info_publisher_;
-    rclcpp::Publisher<aruco_ros2_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
+    rclcpp::Publisher<aruco_markers_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
 
     // Image subscriber (using image_transport)
     std::unique_ptr<image_transport::ImageTransport> it_;
@@ -377,7 +380,7 @@ private:
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    auto aruco_node = std::make_shared<ArucoRos2Node>();
+    auto aruco_node = std::make_shared<ArucoMarkersNode>();
     aruco_node->initialize();
     rclcpp::spin(aruco_node);
     rclcpp::shutdown();
