@@ -7,8 +7,8 @@
 #include <image_transport/image_transport.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <aruco_ros2_msgs/msg/marker.hpp>
-#include <aruco_ros2_msgs/msg/marker_array.hpp>
+#include <aruco_markers_msgs/msg/marker.hpp>
+#include <aruco_markers_msgs/msg/marker_array.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -19,7 +19,7 @@ using namespace std::chrono_literals;
 class ArucoRos2Node : public rclcpp::Node
 {
 public:
-    ArucoRos2Node() : Node("aruco_ros2"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
+    ArucoRos2Node() : Node("aruco_markers"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
     {
         this->declare_parameter("marker_size", 0.1);
         this->declare_parameter("camera_frame", "camera_rgb_optical_frame");
@@ -51,7 +51,7 @@ public:
 
         // Publisher for marker information
         marker_info_publisher_ = this->create_publisher<std_msgs::msg::String>("aruco_marker_info", 10);
-        marker_array_pub_ = this->create_publisher<aruco_ros2_msgs::msg::MarkerArray>("/aruco/markers", 10);
+        marker_array_pub_ = this->create_publisher<aruco_markers_msgs::msg::MarkerArray>("/aruco/markers", 10);
 
         // Image publisher
         image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("/aruco/result", 10);
@@ -125,7 +125,7 @@ private:
             return;
         }
 
-        aruco_ros2_msgs::msg::MarkerArray marker_array;
+        aruco_markers_msgs::msg::MarkerArray marker_array;
         marker_array.header.stamp = this->get_clock()->now();
         marker_array.header.frame_id = camera_frame_;
 
@@ -206,7 +206,7 @@ private:
                     marker_pose.pose.orientation.w = marker_transform.transform.rotation.w;
 
                     // Populate Marker message
-                    aruco_ros2_msgs::msg::Marker marker;
+                    aruco_markers_msgs::msg::Marker marker;
                     marker.header.frame_id = camera_frame_;
                     marker.header.stamp = msg->header.stamp;
                     marker.id = marker_ids[i];
@@ -345,7 +345,7 @@ private:
 
     // ROS 2 Publisher for ArUco marker info
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr marker_info_publisher_;
-    rclcpp::Publisher<aruco_ros2_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
+    rclcpp::Publisher<aruco_markers_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
 
     // Image subscriber (using image_transport)
     std::unique_ptr<image_transport::ImageTransport> it_;
