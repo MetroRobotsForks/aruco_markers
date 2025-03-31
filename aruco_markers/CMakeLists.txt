@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(aruco_ros2)
+project(aruco_markers)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -15,7 +15,7 @@ find_package(cv_bridge REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(aruco_ros2_msgs REQUIRED)
+find_package(aruco_markers_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
 # uncomment the following section in order to fill in
@@ -23,10 +23,10 @@ find_package(tf2_geometry_msgs REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 # Create the executable for the node
-add_executable(aruco_ros2 src/aruco_ros2.cpp)
+add_executable(aruco_markers src/aruco_markers.cpp)
 
 # Link the OpenCV libraries to your node
-ament_target_dependencies(aruco_ros2
+ament_target_dependencies(aruco_markers
   rclcpp
   std_msgs
   OpenCV
@@ -35,20 +35,20 @@ ament_target_dependencies(aruco_ros2
   tf2_ros
   geometry_msgs
   sensor_msgs
-  aruco_ros2_msgs
+  aruco_markers_msgs
   tf2_geometry_msgs
 )
 
 # Include OpenCV headers
-target_include_directories(aruco_ros2 PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_include_directories(aruco_markers PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 # Link OpenCV libraries to your node
-target_link_libraries(aruco_ros2 ${OpenCV_LIBRARIES})
+target_link_libraries(aruco_markers ${OpenCV_LIBRARIES})
 
 
 # Install the executable
 install(TARGETS
-aruco_ros2
+aruco_markers
   DESTINATION lib/${PROJECT_NAME}
 )
 
