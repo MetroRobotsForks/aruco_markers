@@ -2,8 +2,8 @@
 Changelog for package aruco_markers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.2 (2025-04-15)
+------------------
 * support namespacing of topic names
 * Contributors: David Brown
 
