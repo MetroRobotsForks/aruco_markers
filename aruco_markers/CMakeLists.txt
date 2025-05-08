@@ -26,7 +26,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 add_executable(aruco_markers src/aruco_markers.cpp)
 
 # Link the OpenCV libraries to your node
-ament_target_dependencies(aruco_markers
+target_link_libraries(aruco_markers PUBLIC
   rclcpp
   std_msgs
   OpenCV
