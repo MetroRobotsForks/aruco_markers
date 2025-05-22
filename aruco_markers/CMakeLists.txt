@@ -25,25 +25,23 @@ find_package(tf2_geometry_msgs REQUIRED)
 # Create the executable for the node
 add_executable(aruco_markers src/aruco_markers.cpp)
 
-# Link the OpenCV libraries to your node
-ament_target_dependencies(aruco_markers
-  rclcpp
-  std_msgs
-  OpenCV
-  image_transport
-  cv_bridge
-  tf2_ros
-  geometry_msgs
-  sensor_msgs
-  aruco_markers_msgs
-  tf2_geometry_msgs
-)
-
 # Include OpenCV headers
 target_include_directories(aruco_markers PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 # Link OpenCV libraries to your node
-target_link_libraries(aruco_markers ${OpenCV_LIBRARIES})
+target_link_libraries(aruco_markers PUBLIC
+  ${OpenCV_LIBRARIES}
+  ${aruco_markers_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  cv_bridge::cv_bridge
+  image_transport::image_transport
+  rclcpp::rclcpp
+  sensor_msgs::sensor_msgs_library
+  tf2_geometry_msgs::tf2_geometry_msgs
+  tf2_ros::tf2_ros
+)
 
 
 # Install the executable
